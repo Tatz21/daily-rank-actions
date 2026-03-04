@@ -26,6 +26,7 @@ export default function SeoAudit() {
   const [loading, setLoading] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [categories, setCategories] = useState<AuditCategory[]>([]);
+  const { user } = useAuth();
 
   const handleAudit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +50,17 @@ export default function SeoAudit() {
 
       setScore(data.seo_score);
       setCategories(data.categories || []);
+
+      // Save audit to database
+      if (user) {
+        await supabase.from("seo_audits").insert({
+          user_id: user.id,
+          domain: url.trim(),
+          seo_score: data.seo_score,
+          issues: data.categories || [],
+        });
+      }
+
       toast.success("SEO audit complete!");
     } catch (err: any) {
       console.error("Audit error:", err);
