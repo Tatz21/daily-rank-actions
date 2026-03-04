@@ -3,10 +3,24 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import SeoAudit from "./pages/SeoAudit";
+import KeywordResearch from "./pages/KeywordResearch";
+import RankTracker from "./pages/RankTracker";
+import CompetitorAnalysis from "./pages/CompetitorAnalysis";
+import AiAssistant from "./pages/AiAssistant";
+import SettingsPage from "./pages/SettingsPage";
+import DashboardLayout from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const DashboardRoute = ({ children }: { children: React.ReactNode }) => (
+  <DashboardLayout>{children}</DashboardLayout>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -15,8 +29,16 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<DashboardRoute><Dashboard /></DashboardRoute>} />
+          <Route path="/dashboard/audit" element={<DashboardRoute><SeoAudit /></DashboardRoute>} />
+          <Route path="/dashboard/keywords" element={<DashboardRoute><KeywordResearch /></DashboardRoute>} />
+          <Route path="/dashboard/rank-tracker" element={<DashboardRoute><RankTracker /></DashboardRoute>} />
+          <Route path="/dashboard/competitors" element={<DashboardRoute><CompetitorAnalysis /></DashboardRoute>} />
+          <Route path="/dashboard/ai-assistant" element={<DashboardRoute><AiAssistant /></DashboardRoute>} />
+          <Route path="/dashboard/settings" element={<DashboardRoute><SettingsPage /></DashboardRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

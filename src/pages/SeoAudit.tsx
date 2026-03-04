@@ -37,7 +37,7 @@ const mockIssues: { category: string; issues: Issue[] }[] = [
 
 const severityIcon = {
   error: <AlertTriangle className="h-4 w-4 text-destructive" />,
-  warning: <Info className="h-4 w-4 text-yellow-500" />,
+  warning: <Info className="h-4 w-4 text-amber-500" />,
   pass: <CheckCircle2 className="h-4 w-4 text-primary" />,
 };
 

@@ -79,7 +79,7 @@ export default function CompetitorAnalysis() {
 
           <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card overflow-hidden">
             <div className="p-4 border-b border-border flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-yellow-500" />
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
               <h3 className="font-semibold">Keyword Gaps</h3>
             </div>
             <table className="w-full text-sm">
