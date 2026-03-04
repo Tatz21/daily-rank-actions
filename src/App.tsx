@@ -16,6 +16,7 @@ import CompetitorAnalysis from "./pages/CompetitorAnalysis";
 import AiAssistant from "./pages/AiAssistant";
 import SettingsPage from "./pages/SettingsPage";
 import DashboardLayout from "./components/DashboardLayout";
+import AuditReport from "./pages/AuditReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
