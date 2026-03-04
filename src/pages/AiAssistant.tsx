@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import HowToUse from "@/components/HowToUse";
+import QuickSuggestions from "@/components/QuickSuggestions";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -22,13 +24,22 @@ const iconMap: Record<string, typeof Wrench> = {
 
 type Section = { title: string; items: string[] };
 
+const howToSteps = [
+  { title: "Enter your domain", description: "Type the website you want AI to generate SEO tasks for." },
+  { title: "Click 'Generate Tasks'", description: "AI will analyze your site and create actionable SEO tasks organized by category." },
+  { title: "Check off completed tasks", description: "Use the checkboxes to track which SEO improvements you've made." },
+  { title: "Re-run periodically", description: "Come back regularly to get fresh AI-generated tasks as your site evolves." },
+];
+
+const suggestions = ["mybusiness.com", "myportfolio.dev", "localshop.in", "startupname.io", "blogsite.com"];
+
 export default function AiAssistant() {
   const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGenerate = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!domain.trim()) return;
 
     setLoading(true);
@@ -40,10 +51,7 @@ export default function AiAssistant() {
       });
 
       if (error) throw error;
-      if (data?.error) {
-        toast.error(data.error);
-        return;
-      }
+      if (data?.error) { toast.error(data.error); return; }
 
       setSections(data.sections || []);
       toast.success("AI tasks generated!");
@@ -57,7 +65,7 @@ export default function AiAssistant() {
 
   return (
     <div className="max-w-4xl">
-      <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="flex items-center gap-3 mb-8">
+      <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="flex items-center gap-3 mb-6">
         <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
           <Bot className="h-5 w-5 text-primary" />
         </div>
@@ -67,14 +75,12 @@ export default function AiAssistant() {
         </div>
       </motion.div>
 
+      <HowToUse steps={howToSteps} />
+
+      <QuickSuggestions suggestions={suggestions} onSelect={(s) => setDomain(s)} label="Try with a sample domain" />
+
       <motion.form initial="hidden" animate="visible" custom={1} variants={fadeUp} onSubmit={handleGenerate} className="flex gap-3 mb-8">
-        <Input
-          placeholder="Enter your domain (e.g. example.com)"
-          value={domain}
-          onChange={(e) => setDomain(e.target.value)}
-          className="flex-1 bg-muted border-border"
-          disabled={loading}
-        />
+        <Input placeholder="Enter your domain (e.g. example.com)" value={domain} onChange={(e) => setDomain(e.target.value)} className="flex-1 bg-muted border-border" disabled={loading} />
         <Button variant="hero" type="submit" disabled={loading}>
           {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Bot className="h-4 w-4 mr-1" />}
           {loading ? "Generating..." : "Generate Tasks"}
@@ -93,15 +99,8 @@ export default function AiAssistant() {
           {sections.map((section, si) => {
             const Icon = iconMap[section.title] || Wrench;
             return (
-              <motion.div
-                key={section.title}
-                initial="hidden" animate="visible" custom={si + 2} variants={fadeUp}
-                className="glass-card p-6"
-              >
-                <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                  <Icon className="h-4 w-4 text-primary" />
-                  {section.title}
-                </h2>
+              <motion.div key={section.title} initial="hidden" animate="visible" custom={si + 2} variants={fadeUp} className="glass-card p-6">
+                <h2 className="font-semibold text-lg mb-4 flex items-center gap-2"><Icon className="h-4 w-4 text-primary" />{section.title}</h2>
                 <div className="space-y-2">
                   {section.items.map((item, i) => (
                     <label key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group">

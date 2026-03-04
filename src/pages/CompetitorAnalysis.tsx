@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Users, Search, TrendingUp, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import HowToUse from "@/components/HowToUse";
+import QuickSuggestions from "@/components/QuickSuggestions";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -18,13 +20,22 @@ type CompetitorData = {
   gaps: { keyword: string; competitorPos: number; yourPos: number | null }[];
 };
 
+const howToSteps = [
+  { title: "Enter a competitor's domain", description: "Type the website URL of a competitor you want to analyze." },
+  { title: "Click 'Analyze'", description: "AI will research their SEO strategy, top keywords, and traffic estimates." },
+  { title: "Review keyword gaps", description: "See which keywords your competitor ranks for but you don't." },
+  { title: "Take action", description: "Target the gap keywords in your content strategy to compete effectively." },
+];
+
+const suggestions = ["hubspot.com", "ahrefs.com", "moz.com", "semrush.com", "neilpatel.com"];
+
 export default function CompetitorAnalysis() {
   const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<CompetitorData | null>(null);
 
-  const handleAnalyze = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAnalyze = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!domain.trim()) return;
 
     setLoading(true);
@@ -51,7 +62,11 @@ export default function CompetitorAnalysis() {
   return (
     <div className="max-w-4xl">
       <motion.h1 initial="hidden" animate="visible" variants={fadeUp} className="text-2xl font-bold mb-2">Competitor Analysis</motion.h1>
-      <motion.p initial="hidden" animate="visible" variants={fadeUp} className="text-muted-foreground mb-8">Understand your competitors' SEO strategy with AI.</motion.p>
+      <motion.p initial="hidden" animate="visible" variants={fadeUp} className="text-muted-foreground mb-6">Understand your competitors' SEO strategy with AI.</motion.p>
+
+      <HowToUse steps={howToSteps} />
+
+      <QuickSuggestions suggestions={suggestions} onSelect={(s) => setDomain(s)} label="Popular competitors to analyze" />
 
       <motion.form initial="hidden" animate="visible" variants={fadeUp} onSubmit={handleAnalyze} className="flex gap-3 mb-8">
         <Input placeholder="Enter competitor domain..." value={domain} onChange={(e) => setDomain(e.target.value)} className="flex-1 bg-muted border-border" disabled={loading} />
@@ -85,9 +100,7 @@ export default function CompetitorAnalysis() {
             <div className="p-4 border-b border-border"><h3 className="font-semibold">Top Ranking Keywords</h3></div>
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border text-muted-foreground">
-                <th className="text-left p-3 font-medium">Keyword</th>
-                <th className="text-right p-3 font-medium">Position</th>
-                <th className="text-right p-3 font-medium">Volume</th>
+                <th className="text-left p-3 font-medium">Keyword</th><th className="text-right p-3 font-medium">Position</th><th className="text-right p-3 font-medium">Volume</th>
               </tr></thead>
               <tbody>
                 {data.topKeywords?.map(k => (
@@ -102,15 +115,10 @@ export default function CompetitorAnalysis() {
           </motion.div>
 
           <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card overflow-hidden">
-            <div className="p-4 border-b border-border flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <h3 className="font-semibold">Keyword Gaps</h3>
-            </div>
+            <div className="p-4 border-b border-border flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-amber-500" /><h3 className="font-semibold">Keyword Gaps</h3></div>
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border text-muted-foreground">
-                <th className="text-left p-3 font-medium">Keyword</th>
-                <th className="text-right p-3 font-medium">Competitor</th>
-                <th className="text-right p-3 font-medium">You</th>
+                <th className="text-left p-3 font-medium">Keyword</th><th className="text-right p-3 font-medium">Competitor</th><th className="text-right p-3 font-medium">You</th>
               </tr></thead>
               <tbody>
                 {data.gaps?.map(g => (

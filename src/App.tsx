@@ -16,6 +16,7 @@ import CompetitorAnalysis from "./pages/CompetitorAnalysis";
 import AiAssistant from "./pages/AiAssistant";
 import SettingsPage from "./pages/SettingsPage";
 import DashboardLayout from "./components/DashboardLayout";
+import AuditReport from "./pages/AuditReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<DashboardRoute><Dashboard /></DashboardRoute>} />
             <Route path="/dashboard/audit" element={<DashboardRoute><SeoAudit /></DashboardRoute>} />
+            <Route path="/dashboard/audit/:id" element={<DashboardRoute><AuditReport /></DashboardRoute>} />
             <Route path="/dashboard/keywords" element={<DashboardRoute><KeywordResearch /></DashboardRoute>} />
             <Route path="/dashboard/rank-tracker" element={<DashboardRoute><RankTracker /></DashboardRoute>} />
             <Route path="/dashboard/competitors" element={<DashboardRoute><CompetitorAnalysis /></DashboardRoute>} />

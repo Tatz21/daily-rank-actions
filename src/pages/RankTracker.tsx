@@ -6,6 +6,8 @@ import { TrendingUp, ArrowUpRight, ArrowDownRight, Plus, Loader2, Trash2 } from 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import HowToUse from "@/components/HowToUse";
+import QuickSuggestions from "@/components/QuickSuggestions";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -13,12 +15,17 @@ const fadeUp = {
 };
 
 type TrackedKeyword = {
-  id: string;
-  keyword: string;
-  target_url: string | null;
-  position: number | null;
-  tracked_at: string;
+  id: string; keyword: string; target_url: string | null; position: number | null; tracked_at: string;
 };
+
+const howToSteps = [
+  { title: "Add a keyword", description: "Click 'Add Keyword' and enter the keyword you want to track along with your target URL." },
+  { title: "Enter your current position", description: "Add your current Google ranking position so we can track changes over time." },
+  { title: "Track regularly", description: "Come back and update positions to see rising and dropping keywords." },
+  { title: "Analyze trends", description: "The rising/dropping cards show which keywords are improving or declining." },
+];
+
+const suggestions = ["best seo tools 2026", "how to rank on google", "local seo tips", "content marketing strategy", "backlink building"];
 
 export default function RankTracker() {
   const [showAdd, setShowAdd] = useState(false);
@@ -32,12 +39,7 @@ export default function RankTracker() {
 
   const fetchTracked = async () => {
     if (!user) return;
-    const { data, error } = await supabase
-      .from("rank_tracking")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("tracked_at", { ascending: false });
-
+    const { data, error } = await supabase.from("rank_tracking").select("*").eq("user_id", user.id).order("tracked_at", { ascending: false });
     if (!error && data) setTracked(data);
     setFetching(false);
   };
@@ -47,47 +49,30 @@ export default function RankTracker() {
   const handleAdd = async () => {
     if (!keyword.trim() || !user) return;
     setLoading(true);
-
     try {
       const { error } = await supabase.from("rank_tracking").insert({
-        user_id: user.id,
-        keyword: keyword.trim(),
-        target_url: targetUrl.trim() || null,
-        position: position ? parseInt(position) : null,
+        user_id: user.id, keyword: keyword.trim(),
+        target_url: targetUrl.trim() || null, position: position ? parseInt(position) : null,
       });
-
       if (error) throw error;
       toast.success("Keyword tracked!");
       setKeyword(""); setTargetUrl(""); setPosition("");
-      setShowAdd(false);
-      fetchTracked();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to add keyword");
-    } finally {
-      setLoading(false);
-    }
+      setShowAdd(false); fetchTracked();
+    } catch (err: any) { toast.error(err.message || "Failed to add keyword"); }
+    finally { setLoading(false); }
   };
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("rank_tracking").delete().eq("id", id);
-    if (!error) {
-      setTracked(prev => prev.filter(k => k.id !== id));
-      toast.success("Keyword removed");
-    }
+    if (!error) { setTracked(prev => prev.filter(k => k.id !== id)); toast.success("Keyword removed"); }
   };
 
-  // Group by keyword to find latest + calculate change
   const keywordMap = new Map<string, TrackedKeyword[]>();
-  tracked.forEach(t => {
-    const existing = keywordMap.get(t.keyword) || [];
-    existing.push(t);
-    keywordMap.set(t.keyword, existing);
-  });
+  tracked.forEach(t => { const existing = keywordMap.get(t.keyword) || []; existing.push(t); keywordMap.set(t.keyword, existing); });
 
-  const latestKeywords = Array.from(keywordMap.entries()).map(([keyword, entries]) => {
+  const latestKeywords = Array.from(keywordMap.entries()).map(([kw, entries]) => {
     const sorted = entries.sort((a, b) => new Date(b.tracked_at).getTime() - new Date(a.tracked_at).getTime());
-    const latest = sorted[0];
-    const previous = sorted[1];
+    const latest = sorted[0]; const previous = sorted[1];
     const change = latest.position && previous?.position ? previous.position - latest.position : 0;
     return { ...latest, change };
   });
@@ -97,7 +82,7 @@ export default function RankTracker() {
 
   return (
     <div className="max-w-4xl">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <motion.h1 initial="hidden" animate="visible" variants={fadeUp} className="text-2xl font-bold mb-1">Rank Tracker</motion.h1>
           <motion.p initial="hidden" animate="visible" variants={fadeUp} className="text-muted-foreground text-sm">Track your keyword positions over time.</motion.p>
@@ -105,8 +90,12 @@ export default function RankTracker() {
         <Button variant="hero" size="sm" onClick={() => setShowAdd(!showAdd)}><Plus className="h-3.5 w-3.5 mr-1" /> Add Keyword</Button>
       </div>
 
+      <HowToUse steps={howToSteps} />
+
+      <QuickSuggestions suggestions={suggestions} onSelect={(s) => { setKeyword(s); setShowAdd(true); }} label="Suggested keywords to track" />
+
       {showAdd && (
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-4 mb-6 flex gap-3">
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-4 mb-6 flex flex-col sm:flex-row gap-3">
           <Input placeholder="Keyword" className="bg-muted border-border flex-1" value={keyword} onChange={e => setKeyword(e.target.value)} />
           <Input placeholder="Target URL" className="bg-muted border-border flex-1" value={targetUrl} onChange={e => setTargetUrl(e.target.value)} />
           <Input placeholder="Position" type="number" className="bg-muted border-border w-24" value={position} onChange={e => setPosition(e.target.value)} />
@@ -119,33 +108,17 @@ export default function RankTracker() {
       {latestKeywords.length > 0 && (
         <div className="grid sm:grid-cols-2 gap-4 mb-8">
           <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <ArrowUpRight className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-foreground">Top Rising</span>
-            </div>
+            <div className="flex items-center gap-2 mb-3"><ArrowUpRight className="h-4 w-4 text-primary" /><span className="text-sm font-medium text-foreground">Top Rising</span></div>
             <div className="space-y-2">
               {rising.length === 0 && <p className="text-xs text-muted-foreground">No rising keywords yet</p>}
-              {rising.map(k => (
-                <div key={k.id} className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{k.keyword}</span>
-                  <span className="text-primary font-medium">+{k.change}</span>
-                </div>
-              ))}
+              {rising.map(k => (<div key={k.id} className="flex items-center justify-between text-sm"><span className="text-muted-foreground">{k.keyword}</span><span className="text-primary font-medium">+{k.change}</span></div>))}
             </div>
           </motion.div>
           <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <ArrowDownRight className="h-4 w-4 text-destructive" />
-              <span className="text-sm font-medium text-foreground">Top Dropping</span>
-            </div>
+            <div className="flex items-center gap-2 mb-3"><ArrowDownRight className="h-4 w-4 text-destructive" /><span className="text-sm font-medium text-foreground">Top Dropping</span></div>
             <div className="space-y-2">
               {dropping.length === 0 && <p className="text-xs text-muted-foreground">No dropping keywords</p>}
-              {dropping.map(k => (
-                <div key={k.id} className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{k.keyword}</span>
-                  <span className="text-destructive font-medium">{k.change}</span>
-                </div>
-              ))}
+              {dropping.map(k => (<div key={k.id} className="flex items-center justify-between text-sm"><span className="text-muted-foreground">{k.keyword}</span><span className="text-destructive font-medium">{k.change}</span></div>))}
             </div>
           </motion.div>
         </div>
@@ -153,39 +126,23 @@ export default function RankTracker() {
 
       <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card overflow-hidden">
         {fetching ? (
-          <div className="p-8 text-center">
-            <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Loading tracked keywords...</p>
-          </div>
+          <div className="p-8 text-center"><Loader2 className="h-6 w-6 animate-spin text-primary mx-auto mb-2" /><p className="text-sm text-muted-foreground">Loading...</p></div>
         ) : latestKeywords.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-muted-foreground">No keywords tracked yet. Click "Add Keyword" to start.</p>
-          </div>
+          <div className="p-8 text-center"><p className="text-muted-foreground">No keywords tracked yet. Click "Add Keyword" to start.</p></div>
         ) : (
           <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-muted-foreground">
-                <th className="text-left p-3 font-medium">Keyword</th>
-                <th className="text-left p-3 font-medium">URL</th>
-                <th className="text-right p-3 font-medium">Position</th>
-                <th className="text-right p-3 font-medium">Change</th>
-                <th className="text-right p-3 font-medium"></th>
-              </tr>
-            </thead>
+            <thead><tr className="border-b border-border text-muted-foreground">
+              <th className="text-left p-3 font-medium">Keyword</th><th className="text-left p-3 font-medium">URL</th>
+              <th className="text-right p-3 font-medium">Position</th><th className="text-right p-3 font-medium">Change</th><th className="text-right p-3 font-medium"></th>
+            </tr></thead>
             <tbody>
               {latestKeywords.map(k => (
                 <tr key={k.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                   <td className="p-3 text-foreground">{k.keyword}</td>
                   <td className="p-3 text-muted-foreground text-xs">{k.target_url || "—"}</td>
                   <td className="p-3 text-right font-medium text-foreground">{k.position ? `#${k.position}` : "—"}</td>
-                  <td className={`p-3 text-right font-medium ${k.change > 0 ? "text-primary" : k.change < 0 ? "text-destructive" : "text-muted-foreground"}`}>
-                    {k.change > 0 ? `+${k.change}` : k.change || "—"}
-                  </td>
-                  <td className="p-3 text-right">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(k.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </td>
+                  <td className={`p-3 text-right font-medium ${k.change > 0 ? "text-primary" : k.change < 0 ? "text-destructive" : "text-muted-foreground"}`}>{k.change > 0 ? `+${k.change}` : k.change || "—"}</td>
+                  <td className="p-3 text-right"><Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(k.id)}><Trash2 className="h-3.5 w-3.5" /></Button></td>
                 </tr>
               ))}
             </tbody>
