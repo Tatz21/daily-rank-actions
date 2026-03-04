@@ -91,9 +91,9 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3">
                 {recentAudits.map((audit) => (
-                  <div key={audit.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                  <Link key={audit.id} to={`/dashboard/audit/${audit.id}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group">
                     <div>
-                      <p className="font-medium text-sm text-foreground">{audit.domain}</p>
+                      <p className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">{audit.domain}</p>
                       <p className="text-xs text-muted-foreground">{new Date(audit.created_at).toLocaleDateString()}</p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -101,8 +101,9 @@ export default function Dashboard() {
                         {audit.seo_score}
                       </span>
                       <span className="text-xs text-muted-foreground">/100</span>
+                      <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
