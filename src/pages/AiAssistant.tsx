@@ -1,5 +1,10 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bot, CheckCircle2, Lightbulb, FileText, Wrench } from "lucide-react";
+import { Bot, Wrench, Lightbulb, FileText, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -9,43 +14,47 @@ const fadeUp = {
   }),
 };
 
-const sections = [
-  {
-    title: "Top SEO Fixes",
-    icon: Wrench,
-    items: [
-      "Add primary keyword to homepage title tag",
-      "Improve meta description length to 150-160 characters",
-      "Add alt text to 3 images missing attributes",
-      "Fix 2 broken internal links",
-      "Optimize page load speed — compress hero image",
-    ],
-  },
-  {
-    title: "Keyword Opportunities",
-    icon: Lightbulb,
-    items: [
-      "\"best gym in baguiati\" — low competition, high local intent",
-      "\"seo tips for startups\" — trending upward",
-      "\"free website audit\" — matches your service",
-      "\"how to improve google ranking\" — informational content gap",
-      "\"local business seo checklist\" — content opportunity",
-    ],
-  },
-  {
-    title: "Blog Content Ideas",
-    icon: FileText,
-    items: [
-      "Write: \"10 SEO Mistakes Small Businesses Make\"",
-      "Write: \"How to Do Keyword Research in 2026\"",
-      "Write: \"Local SEO Guide for Restaurants\"",
-      "Write: \"Why Your Website Isn't Ranking on Google\"",
-      "Write: \"SEO vs SEM: Which is Better for Small Business?\"",
-    ],
-  },
-];
+const iconMap: Record<string, typeof Wrench> = {
+  "Top SEO Fixes": Wrench,
+  "Keyword Opportunities": Lightbulb,
+  "Blog Content Ideas": FileText,
+};
+
+type Section = { title: string; items: string[] };
 
 export default function AiAssistant() {
+  const [domain, setDomain] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sections, setSections] = useState<Section[]>([]);
+
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!domain.trim()) return;
+
+    setLoading(true);
+    setSections([]);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-assistant", {
+        body: { domain: domain.trim() },
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      setSections(data.sections || []);
+      toast.success("AI tasks generated!");
+    } catch (err: any) {
+      console.error("AI assistant error:", err);
+      toast.error(err.message || "Failed to generate tasks");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl">
       <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="flex items-center gap-3 mb-8">
@@ -54,32 +63,58 @@ export default function AiAssistant() {
         </div>
         <div>
           <h1 className="text-2xl font-bold">AI SEO Assistant</h1>
-          <p className="text-sm text-muted-foreground">AI-generated SEO tasks based on your site analysis.</p>
+          <p className="text-sm text-muted-foreground">Get AI-generated SEO tasks for your website.</p>
         </div>
       </motion.div>
 
-      <div className="space-y-6">
-        {sections.map((section, si) => (
-          <motion.div
-            key={section.title}
-            initial="hidden" animate="visible" custom={si + 1} variants={fadeUp}
-            className="glass-card p-6"
-          >
-            <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-              <section.icon className="h-4 w-4 text-primary" />
-              {section.title}
-            </h2>
-            <div className="space-y-2">
-              {section.items.map((item, i) => (
-                <label key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group">
-                  <input type="checkbox" className="mt-0.5 accent-[hsl(var(--primary))]" />
-                  <span className="text-sm text-foreground group-hover:text-foreground/90">{item}</span>
-                </label>
-              ))}
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      <motion.form initial="hidden" animate="visible" custom={1} variants={fadeUp} onSubmit={handleGenerate} className="flex gap-3 mb-8">
+        <Input
+          placeholder="Enter your domain (e.g. example.com)"
+          value={domain}
+          onChange={(e) => setDomain(e.target.value)}
+          className="flex-1 bg-muted border-border"
+          disabled={loading}
+        />
+        <Button variant="hero" type="submit" disabled={loading}>
+          {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Bot className="h-4 w-4 mr-1" />}
+          {loading ? "Generating..." : "Generate Tasks"}
+        </Button>
+      </motion.form>
+
+      {loading && (
+        <motion.div initial="hidden" animate="visible" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }} className="glass-card p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">AI is analyzing your site and generating tasks...</p>
+        </motion.div>
+      )}
+
+      {!loading && sections.length > 0 && (
+        <div className="space-y-6">
+          {sections.map((section, si) => {
+            const Icon = iconMap[section.title] || Wrench;
+            return (
+              <motion.div
+                key={section.title}
+                initial="hidden" animate="visible" custom={si + 2} variants={fadeUp}
+                className="glass-card p-6"
+              >
+                <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <Icon className="h-4 w-4 text-primary" />
+                  {section.title}
+                </h2>
+                <div className="space-y-2">
+                  {section.items.map((item, i) => (
+                    <label key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group">
+                      <input type="checkbox" className="mt-0.5 accent-[hsl(var(--primary))]" />
+                      <span className="text-sm text-foreground group-hover:text-foreground/90">{item}</span>
+                    </label>
+                  ))}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -111,3 +111,12 @@
     box-shadow: 0 0 8px 2px hsl(var(--glow-primary) / 0.5);
   }
 }
+
+@keyframes waves {
+  0% {
+    transform: translateY(-170px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

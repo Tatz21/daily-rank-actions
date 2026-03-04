@@ -1,0 +1,7 @@
+project_id = "akttpzcafeygjsuancuk"
+
+[functions.seo-audit]
+verify_jwt = false
+
+[functions.ai-assistant]
+verify_jwt = false

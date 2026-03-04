@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
-import { Sprout } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Sprout, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -10,6 +13,24 @@ const fadeUp = {
 };
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await signIn(email, password);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      navigate("/dashboard");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <motion.div initial="hidden" animate="visible" variants={fadeUp} className="w-full max-w-sm">
@@ -21,19 +42,20 @@ export default function Login() {
           <h1 className="text-2xl font-bold">Welcome back</h1>
           <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
         </div>
-        <div className="glass-card p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="glass-card p-6 space-y-4">
           <div>
             <label className="text-sm text-muted-foreground mb-1.5 block">Email</label>
-            <Input type="email" placeholder="you@example.com" className="bg-muted border-border" />
+            <Input type="email" placeholder="you@example.com" className="bg-muted border-border" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div>
             <label className="text-sm text-muted-foreground mb-1.5 block">Password</label>
-            <Input type="password" placeholder="••••••••" className="bg-muted border-border" />
+            <Input type="password" placeholder="••••••••" className="bg-muted border-border" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
-          <Button variant="hero" className="w-full" asChild>
-            <Link to="/dashboard">Sign In</Link>
+          <Button variant="hero" className="w-full" type="submit" disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+            Sign In
           </Button>
-        </div>
+        </form>
         <p className="text-center text-sm text-muted-foreground mt-4">
           Don't have an account?{" "}
           <Link to="/signup" className="text-primary hover:underline">Sign up</Link>
