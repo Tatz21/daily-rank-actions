@@ -3,8 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
   Search, BarChart3, Users, TrendingUp, Bot, Shield,
-  ArrowRight, Sparkles, CheckCircle2, Sprout
+  ArrowRight, Sparkles, CheckCircle2, Sprout, Lock, Settings
 } from "lucide-react";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
+import {
+  PricingWrapper, Heading, Price, Paragraph
+} from "@/components/ui/animated-pricing-cards";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -15,11 +19,11 @@ const fadeUp = {
 };
 
 const features = [
-  { icon: Shield, title: "SEO Audit", desc: "Analyze your website and detect SEO issues instantly." },
-  { icon: Search, title: "Keyword Finder", desc: "Discover low competition keywords for your niche." },
-  { icon: Users, title: "Competitor Insights", desc: "Understand which keywords your competitors rank for." },
-  { icon: TrendingUp, title: "Rank Tracker", desc: "Track your Google keyword positions over time." },
-  { icon: Bot, title: "AI SEO Assistant", desc: "Get daily SEO tasks powered by AI." },
+  { area: "md:[grid-area:1/1/2/7]", icon: <Shield className="h-5 w-5 text-primary" />, title: "SEO Audit", desc: "Analyze your website and detect SEO issues instantly with AI-powered scoring." },
+  { area: "md:[grid-area:1/7/2/13]", icon: <Search className="h-5 w-5 text-primary" />, title: "Keyword Finder", desc: "Discover low competition keywords for your niche." },
+  { area: "md:[grid-area:2/1/3/5]", icon: <Users className="h-5 w-5 text-primary" />, title: "Competitor Insights", desc: "Understand which keywords your competitors rank for." },
+  { area: "md:[grid-area:2/5/3/9]", icon: <TrendingUp className="h-5 w-5 text-primary" />, title: "Rank Tracker", desc: "Track your Google keyword positions over time." },
+  { area: "md:[grid-area:2/9/3/13]", icon: <Bot className="h-5 w-5 text-primary" />, title: "AI SEO Assistant", desc: "Get daily SEO tasks powered by AI." },
 ];
 
 const plans = [
@@ -76,9 +80,7 @@ export default function Landing() {
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 md:pt-44 md:pb-32">
-        {/* Glow effect */}
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-
         <div className="container mx-auto px-6 text-center relative z-10">
           <motion.div
             initial="hidden" animate="visible" custom={0} variants={fadeUp}
@@ -117,7 +119,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Features - Glowing Grid */}
       <section id="features" className="py-20 md:py-32">
         <div className="container mx-auto px-6">
           <motion.div
@@ -130,26 +132,35 @@ export default function Landing() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <ul className="grid grid-cols-1 grid-rows-none gap-4 md:grid-cols-12 md:grid-rows-2 lg:gap-4 xl:max-w-5xl xl:mx-auto">
             {features.map((f, i) => (
-              <motion.div
+              <motion.li
                 key={f.title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 custom={i} variants={fadeUp}
-                className="glass-card p-6 group hover:border-primary/30 transition-all duration-300"
+                className={`min-h-[14rem] list-none ${f.area}`}
               >
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <f.icon className="h-5 w-5 text-primary" />
+                <div className="relative h-full rounded-2xl border border-border bg-card p-2">
+                  <GlowingEffect spread={40} glow proximity={64} inactiveZone={0.01} borderWidth={2} disabled={false} />
+                  <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.5px] border-border bg-background p-6">
+                    <div className="relative flex flex-1 flex-col justify-between gap-3">
+                      <div className="w-fit rounded-lg border border-border p-2">
+                        {f.icon}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">{f.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-2">{f.desc}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-lg text-foreground">{f.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-              </motion.div>
+              </motion.li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Pricing - Animated Cards */}
       <section id="pricing" className="py-20 md:py-32">
         <div className="container mx-auto px-6">
           <motion.div
@@ -166,32 +177,37 @@ export default function Landing() {
                 key={plan.name}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 custom={i} variants={fadeUp}
-                className={`rounded-xl p-6 flex flex-col ${
-                  plan.highlight
-                    ? "gradient-border bg-card shadow-glow"
-                    : "glass-card"
-                }`}
               >
-                <h3 className="font-semibold text-lg text-foreground">{plan.name}</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-foreground">{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{plan.period}</span>
-                </div>
-                <ul className="mt-6 space-y-3 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  variant={plan.highlight ? "hero" : "hero-outline"}
-                  className="mt-8 w-full"
-                  asChild
+                <PricingWrapper
+                  contactHref="/signup"
+                  type={plan.highlight ? "waves" : "crosses"}
+                  className={plan.highlight ? "shadow-glow border-primary/30" : ""}
                 >
-                  <Link to="/signup">{plan.cta}</Link>
-                </Button>
+                  <div className="p-6">
+                    <Heading>{plan.name}</Heading>
+                    <Price>
+                      <span className="text-3xl font-bold">{plan.price}</span>
+                      <span className="text-sm text-muted-foreground">{plan.period}</span>
+                    </Price>
+                    <Paragraph>
+                      <ul className="space-y-3 mt-4 text-left">
+                        {plan.features.map((f) => (
+                          <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    </Paragraph>
+                    <Button
+                      variant={plan.highlight ? "hero" : "hero-outline"}
+                      className="mt-6 w-full"
+                      asChild
+                    >
+                      <Link to="/signup">{plan.cta}</Link>
+                    </Button>
+                  </div>
+                </PricingWrapper>
               </motion.div>
             ))}
           </div>
