@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Shield, AlertTriangle, CheckCircle2, Info, Search, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const fadeUp = {
@@ -25,6 +26,7 @@ export default function SeoAudit() {
   const [loading, setLoading] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [categories, setCategories] = useState<AuditCategory[]>([]);
+  const { user } = useAuth();
 
   const handleAudit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +50,17 @@ export default function SeoAudit() {
 
       setScore(data.seo_score);
       setCategories(data.categories || []);
+
+      // Save audit to database
+      if (user) {
+        await supabase.from("seo_audits").insert({
+          user_id: user.id,
+          domain: url.trim(),
+          seo_score: data.seo_score,
+          issues: data.categories || [],
+        });
+      }
+
       toast.success("SEO audit complete!");
     } catch (err: any) {
       console.error("Audit error:", err);

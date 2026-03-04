@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.ai-assistant]
 verify_jwt = false
+
+[functions.keyword-research]
+verify_jwt = false
+
+[functions.competitor-analysis]
+verify_jwt = false

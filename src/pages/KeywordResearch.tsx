@@ -2,7 +2,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowUpDown, Download } from "lucide-react";
+import { Search, ArrowUpDown, Download, Loader2, Save } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -11,28 +14,78 @@ const fadeUp = {
 
 type KW = { keyword: string; volume: number; difficulty: number; opportunity: number };
 
-const mockKeywords: KW[] = [
-  { keyword: "best seo tools for small business", volume: 2400, difficulty: 35, opportunity: 82 },
-  { keyword: "seo tips for beginners", volume: 5100, difficulty: 42, opportunity: 71 },
-  { keyword: "local seo checklist", volume: 1800, difficulty: 28, opportunity: 88 },
-  { keyword: "how to rank on google", volume: 8200, difficulty: 65, opportunity: 45 },
-  { keyword: "free keyword research tool", volume: 3300, difficulty: 52, opportunity: 58 },
-  { keyword: "seo audit free", volume: 1200, difficulty: 22, opportunity: 91 },
-  { keyword: "on page seo guide", volume: 2700, difficulty: 38, opportunity: 76 },
-];
-
 const difficultyColor = (d: number) =>
-  d < 30 ? "text-primary" : d < 50 ? "text-yellow-500" : "text-destructive";
+  d < 30 ? "text-primary" : d < 50 ? "text-amber-500" : "text-destructive";
 
 export default function KeywordResearch() {
   const [seed, setSeed] = useState("");
   const [results, setResults] = useState<KW[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [sortKey, setSortKey] = useState<keyof KW>("opportunity");
   const [sortAsc, setSortAsc] = useState(false);
+  const { user } = useAuth();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (seed.trim()) setResults(mockKeywords);
+    if (!seed.trim()) return;
+
+    setLoading(true);
+    setResults(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("keyword-research", {
+        body: { seed: seed.trim() },
+      });
+
+      if (error) throw error;
+      if (data?.error) { toast.error(data.error); return; }
+
+      setResults(data.keywords || []);
+      toast.success(`Found ${data.keywords?.length || 0} keywords!`);
+    } catch (err: any) {
+      console.error("Keyword research error:", err);
+      toast.error(err.message || "Failed to research keywords");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAll = async () => {
+    if (!results || !user) return;
+    setSaving(true);
+
+    try {
+      const rows = results.map(kw => ({
+        user_id: user.id,
+        keyword: kw.keyword,
+        volume: kw.volume,
+        difficulty: kw.difficulty,
+        opportunity_score: kw.opportunity,
+      }));
+
+      const { error } = await supabase.from("keywords").insert(rows);
+      if (error) throw error;
+      toast.success("Keywords saved to your database!");
+    } catch (err: any) {
+      console.error("Save error:", err);
+      toast.error(err.message || "Failed to save keywords");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (!results) return;
+    const csv = ["Keyword,Volume,Difficulty,Opportunity",
+      ...results.map(kw => `"${kw.keyword}",${kw.volume},${kw.difficulty},${kw.opportunity}`)
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `keywords-${seed}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Keywords exported!");
   };
 
   const sorted = results
@@ -50,19 +103,36 @@ export default function KeywordResearch() {
         Keyword Research
       </motion.h1>
       <motion.p initial="hidden" animate="visible" variants={fadeUp} className="text-muted-foreground mb-8">
-        Discover low-competition keywords for your niche.
+        Discover low-competition keywords for your niche using AI.
       </motion.p>
 
       <motion.form initial="hidden" animate="visible" variants={fadeUp} onSubmit={handleSearch} className="flex gap-3 mb-8">
-        <Input placeholder="Enter a seed keyword..." value={seed} onChange={(e) => setSeed(e.target.value)} className="flex-1 bg-muted border-border" />
-        <Button variant="hero" type="submit"><Search className="h-4 w-4 mr-1" /> Search</Button>
+        <Input placeholder="Enter a seed keyword..." value={seed} onChange={(e) => setSeed(e.target.value)} className="flex-1 bg-muted border-border" disabled={loading} />
+        <Button variant="hero" type="submit" disabled={loading}>
+          {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Search className="h-4 w-4 mr-1" />}
+          {loading ? "Searching..." : "Search"}
+        </Button>
       </motion.form>
 
-      {sorted && (
+      {loading && (
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">AI is researching keywords...</p>
+        </motion.div>
+      )}
+
+      {sorted && !loading && (
         <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-border">
             <span className="text-sm text-muted-foreground">{sorted.length} keywords found</span>
-            <Button variant="ghost" size="sm"><Download className="h-3.5 w-3.5 mr-1" /> Export</Button>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={handleSaveAll} disabled={saving}>
+                <Save className="h-3.5 w-3.5 mr-1" /> {saving ? "Saving..." : "Save All"}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleExport}>
+                <Download className="h-3.5 w-3.5 mr-1" /> Export
+              </Button>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
