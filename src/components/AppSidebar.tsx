@@ -1,0 +1,59 @@
+import {
+  LayoutDashboard, Shield, Search, TrendingUp, Users, Bot, Settings, Sprout
+} from "lucide-react";
+import { NavLink } from "@/components/NavLink";
+import { useLocation, Link } from "react-router-dom";
+import {
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
+} from "@/components/ui/sidebar";
+
+const items = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "SEO Audit", url: "/dashboard/audit", icon: Shield },
+  { title: "Keyword Research", url: "/dashboard/keywords", icon: Search },
+  { title: "Rank Tracker", url: "/dashboard/rank-tracker", icon: TrendingUp },
+  { title: "Competitors", url: "/dashboard/competitors", icon: Users },
+  { title: "AI Assistant", url: "/dashboard/ai-assistant", icon: Bot },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+];
+
+export function AppSidebar() {
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+  const location = useLocation();
+
+  return (
+    <Sidebar collapsible="icon">
+      <SidebarContent>
+        <div className="p-4">
+          <Link to="/" className="flex items-center gap-2">
+            <Sprout className="h-5 w-5 text-primary shrink-0" />
+            {!collapsed && <span className="font-bold text-foreground text-sm">RankSprout</span>}
+          </Link>
+        </div>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      end={item.url === "/dashboard"}
+                      className="hover:bg-muted/50"
+                      activeClassName="bg-muted text-primary font-medium"
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
+}
