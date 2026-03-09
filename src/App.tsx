@@ -20,6 +20,7 @@ import AuditReport from "./pages/AuditReport";
 import MetaTagGenerator from "./pages/MetaTagGenerator";
 import BacklinkChecker from "./pages/BacklinkChecker";
 import ContentScoreAnalyzer from "./pages/ContentScoreAnalyzer";
+import SitemapGenerator from "./pages/SitemapGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/dashboard/meta-tags" element={<DashboardRoute><MetaTagGenerator /></DashboardRoute>} />
             <Route path="/dashboard/backlinks" element={<DashboardRoute><BacklinkChecker /></DashboardRoute>} />
             <Route path="/dashboard/content-score" element={<DashboardRoute><ContentScoreAnalyzer /></DashboardRoute>} />
+            <Route path="/dashboard/sitemap" element={<DashboardRoute><SitemapGenerator /></DashboardRoute>} />
             <Route path="/dashboard/settings" element={<DashboardRoute><SettingsPage /></DashboardRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

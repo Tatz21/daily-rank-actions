@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Shield, Search, TrendingUp, Users, Bot, Settings, Sprout, LogOut, Tags, Link2, FileText
+  LayoutDashboard, Shield, Search, TrendingUp, Users, Bot, Settings, Sprout, LogOut, Tags, Link2, FileText, Map
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
@@ -20,6 +20,7 @@ const items = [
   { title: "Meta Tags", url: "/dashboard/meta-tags", icon: Tags },
   { title: "Backlinks", url: "/dashboard/backlinks", icon: Link2 },
   { title: "Content Score", url: "/dashboard/content-score", icon: FileText },
+  { title: "Sitemap", url: "/dashboard/sitemap", icon: Map },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
