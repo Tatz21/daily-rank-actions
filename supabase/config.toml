@@ -11,3 +11,12 @@ verify_jwt = false
 
 [functions.competitor-analysis]
 verify_jwt = false
+
+[functions.meta-tag-generator]
+verify_jwt = false
+
+[functions.backlink-checker]
+verify_jwt = false
+
+[functions.content-score]
+verify_jwt = false
