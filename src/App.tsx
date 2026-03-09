@@ -48,6 +48,9 @@ const App = () => (
             <Route path="/dashboard/rank-tracker" element={<DashboardRoute><RankTracker /></DashboardRoute>} />
             <Route path="/dashboard/competitors" element={<DashboardRoute><CompetitorAnalysis /></DashboardRoute>} />
             <Route path="/dashboard/ai-assistant" element={<DashboardRoute><AiAssistant /></DashboardRoute>} />
+            <Route path="/dashboard/meta-tags" element={<DashboardRoute><MetaTagGenerator /></DashboardRoute>} />
+            <Route path="/dashboard/backlinks" element={<DashboardRoute><BacklinkChecker /></DashboardRoute>} />
+            <Route path="/dashboard/content-score" element={<DashboardRoute><ContentScoreAnalyzer /></DashboardRoute>} />
             <Route path="/dashboard/settings" element={<DashboardRoute><SettingsPage /></DashboardRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
