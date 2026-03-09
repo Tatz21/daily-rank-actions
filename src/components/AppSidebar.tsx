@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Shield, Search, TrendingUp, Users, Bot, Settings, Sprout, LogOut, Tags, Link2, FileText
+  LayoutDashboard, Shield, Search, TrendingUp, Users, Bot, Settings, Sprout, LogOut, Tags, Link2, FileText, Map
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
