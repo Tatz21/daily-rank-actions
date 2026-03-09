@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Shield, Search, TrendingUp, Users, Bot, Settings, Sprout, LogOut
+  LayoutDashboard, Shield, Search, TrendingUp, Users, Bot, Settings, Sprout, LogOut, Tags, Link2, FileText
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
@@ -17,6 +17,9 @@ const items = [
   { title: "Rank Tracker", url: "/dashboard/rank-tracker", icon: TrendingUp },
   { title: "Competitors", url: "/dashboard/competitors", icon: Users },
   { title: "AI Assistant", url: "/dashboard/ai-assistant", icon: Bot },
+  { title: "Meta Tags", url: "/dashboard/meta-tags", icon: Tags },
+  { title: "Backlinks", url: "/dashboard/backlinks", icon: Link2 },
+  { title: "Content Score", url: "/dashboard/content-score", icon: FileText },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
