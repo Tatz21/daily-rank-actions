@@ -20,6 +20,7 @@ const items = [
   { title: "Meta Tags", url: "/dashboard/meta-tags", icon: Tags },
   { title: "Backlinks", url: "/dashboard/backlinks", icon: Link2 },
   { title: "Content Score", url: "/dashboard/content-score", icon: FileText },
+  { title: "Sitemap", url: "/dashboard/sitemap", icon: Map },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 

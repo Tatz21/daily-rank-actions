@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, Search, Users, CheckCircle2, ArrowUpRight, ArrowDownRight, Shield, Loader2 } from "lucide-react";
+import { TrendingUp, Search, Users, Shield, Loader2, ArrowUpRight, Tags, Link2, FileText, Map, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -9,7 +9,7 @@ const fadeUp = {
   hidden: { opacity: 0, y: 16 },
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.08, duration: 0.4 }
+    transition: { delay: i * 0.08, duration: 0.4 },
   }),
 };
 
@@ -49,6 +49,14 @@ export default function Dashboard() {
     { label: "Keywords Tracked", value: stats.tracked, icon: Users, link: "/dashboard/rank-tracker" },
   ];
 
+  const quickTools = [
+    { label: "Meta Tags", desc: "Generate optimized tags", icon: Tags, link: "/dashboard/meta-tags" },
+    { label: "Backlinks", desc: "Analyze link profile", icon: Link2, link: "/dashboard/backlinks" },
+    { label: "Content Score", desc: "Score your content", icon: FileText, link: "/dashboard/content-score" },
+    { label: "Sitemap", desc: "Generate XML sitemap", icon: Map, link: "/dashboard/sitemap" },
+    { label: "AI Assistant", desc: "Get SEO task list", icon: Bot, link: "/dashboard/ai-assistant" },
+  ];
+
   return (
     <div className="max-w-5xl">
       <motion.h1 initial="hidden" animate="visible" custom={0} variants={fadeUp} className="text-2xl font-bold mb-2">
@@ -78,7 +86,21 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <motion.div initial="hidden" animate="visible" custom={4} variants={fadeUp} className="glass-card p-6">
+          {/* Quick Tools Grid */}
+          <motion.div initial="hidden" animate="visible" custom={4} variants={fadeUp} className="mb-8">
+            <h2 className="font-semibold text-lg mb-4">Quick Tools</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {quickTools.map((tool) => (
+                <Link key={tool.label} to={tool.link} className="glass-card p-4 hover:border-primary/30 transition-colors group text-center">
+                  <tool.icon className="h-5 w-5 text-primary mx-auto mb-2" />
+                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{tool.label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{tool.desc}</p>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div initial="hidden" animate="visible" custom={5} variants={fadeUp} className="glass-card p-6">
             <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
               <Shield className="h-4 w-4 text-primary" />
               Recent Audits
