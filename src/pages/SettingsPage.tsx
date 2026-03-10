@@ -130,7 +130,9 @@ export default function SettingsPage() {
               <p className="font-medium text-foreground">Free Plan</p>
               <p className="text-xs text-muted-foreground">3 audits · 20 keyword searches</p>
             </div>
-            <Button variant="hero-outline" size="sm">Upgrade</Button>
+            <Button variant="hero-outline" size="sm" asChild>
+              <Link to="/dashboard/pricing">Upgrade</Link>
+            </Button>
           </div>
         </motion.div>
 
