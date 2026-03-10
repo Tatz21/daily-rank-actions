@@ -55,6 +55,7 @@ const App = () => (
             <Route path="/dashboard/content-score" element={<DashboardRoute><ContentScoreAnalyzer /></DashboardRoute>} />
             <Route path="/dashboard/sitemap" element={<DashboardRoute><SitemapGenerator /></DashboardRoute>} />
             <Route path="/dashboard/settings" element={<DashboardRoute><SettingsPage /></DashboardRoute>} />
+            <Route path="/dashboard/pricing" element={<DashboardRoute><PricingPage /></DashboardRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
