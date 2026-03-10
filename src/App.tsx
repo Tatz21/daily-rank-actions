@@ -21,6 +21,7 @@ import MetaTagGenerator from "./pages/MetaTagGenerator";
 import BacklinkChecker from "./pages/BacklinkChecker";
 import ContentScoreAnalyzer from "./pages/ContentScoreAnalyzer";
 import SitemapGenerator from "./pages/SitemapGenerator";
+import PricingPage from "./pages/PricingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
