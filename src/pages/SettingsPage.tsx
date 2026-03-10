@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User, Globe, CreditCard, LogOut, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -129,7 +130,9 @@ export default function SettingsPage() {
               <p className="font-medium text-foreground">Free Plan</p>
               <p className="text-xs text-muted-foreground">3 audits · 20 keyword searches</p>
             </div>
-            <Button variant="hero-outline" size="sm">Upgrade</Button>
+            <Button variant="hero-outline" size="sm" asChild>
+              <Link to="/dashboard/pricing">Upgrade</Link>
+            </Button>
           </div>
         </motion.div>
 
