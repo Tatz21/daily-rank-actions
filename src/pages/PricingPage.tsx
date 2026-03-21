@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Loader2, Sparkles, Crown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -52,6 +53,7 @@ declare global {
 
 export default function PricingPage() {
   const { user } = useAuth();
+  const { plan: currentPlan, loading: subLoading } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
 
   const loadRazorpayScript = (): Promise<boolean> => {
@@ -66,7 +68,7 @@ export default function PricingPage() {
   };
 
   const handleSubscribe = async (planId: string) => {
-    if (planId === "free") return;
+    if (planId === "free" || planId === currentPlan) return;
     if (!user) {
       toast.error("Please log in to subscribe");
       return;
@@ -108,6 +110,7 @@ export default function PricingPage() {
             );
             if (verifyError || verifyData?.error) throw new Error(verifyData?.error || verifyError?.message);
             toast.success(`Upgraded to ${planId} plan! 🎉`);
+            window.location.reload();
           } catch (err: any) {
             toast.error(err.message || "Payment verification failed");
           }
@@ -123,6 +126,13 @@ export default function PricingPage() {
     }
   };
 
+  const getButtonLabel = (planId: string) => {
+    if (planId === currentPlan) return "Current Plan";
+    if (planId === "free") return "Free";
+    const planOrder = ["free", "creator", "pro"];
+    return planOrder.indexOf(planId) > planOrder.indexOf(currentPlan) ? `Upgrade to ${plans.find(p => p.id === planId)?.name}` : "Downgrade";
+  };
+
   return (
     <div className="max-w-4xl">
       <motion.h1 initial="hidden" animate="visible" custom={0} variants={fadeUp} className="text-2xl font-bold mb-2">
@@ -133,45 +143,51 @@ export default function PricingPage() {
       </motion.p>
 
       <div className="grid md:grid-cols-3 gap-4">
-        {plans.map((plan, i) => (
-          <motion.div
-            key={plan.id}
-            initial="hidden"
-            animate="visible"
-            custom={i + 1}
-            variants={fadeUp}
-            className={`glass-card p-6 flex flex-col ${plan.highlight ? "border-primary/40 shadow-glow" : ""}`}
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <plan.icon className={`h-5 w-5 ${plan.highlight ? "text-primary" : "text-muted-foreground"}`} />
-              <h3 className="font-semibold text-lg text-foreground">{plan.name}</h3>
-            </div>
-
-            <div className="mb-5">
-              <span className="text-3xl font-bold text-foreground">{plan.price}</span>
-              <span className="text-sm text-muted-foreground ml-1">{plan.period}</span>
-            </div>
-
-            <ul className="space-y-2.5 flex-1 mb-6">
-              {plan.features.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            <Button
-              variant={plan.highlight ? "hero" : "hero-outline"}
-              className="w-full"
-              disabled={plan.id === "free" || loading !== null}
-              onClick={() => handleSubscribe(plan.id)}
+        {plans.map((plan, i) => {
+          const isCurrent = plan.id === currentPlan;
+          return (
+            <motion.div
+              key={plan.id}
+              initial="hidden"
+              animate="visible"
+              custom={i + 1}
+              variants={fadeUp}
+              className={`glass-card p-6 flex flex-col ${plan.highlight ? "border-primary/40 shadow-glow" : ""} ${isCurrent ? "ring-2 ring-primary/50" : ""}`}
             >
-              {loading === plan.id && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-              {plan.id === "free" ? "Current Plan" : `Get ${plan.name}`}
-            </Button>
-          </motion.div>
-        ))}
+              {isCurrent && (
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-2">Your Plan</span>
+              )}
+              <div className="flex items-center gap-2 mb-4">
+                <plan.icon className={`h-5 w-5 ${plan.highlight ? "text-primary" : "text-muted-foreground"}`} />
+                <h3 className="font-semibold text-lg text-foreground">{plan.name}</h3>
+              </div>
+
+              <div className="mb-5">
+                <span className="text-3xl font-bold text-foreground">{plan.price}</span>
+                <span className="text-sm text-muted-foreground ml-1">{plan.period}</span>
+              </div>
+
+              <ul className="space-y-2.5 flex-1 mb-6">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                variant={plan.highlight ? "hero" : "hero-outline"}
+                className="w-full"
+                disabled={isCurrent || loading !== null || subLoading}
+                onClick={() => handleSubscribe(plan.id)}
+              >
+                {loading === plan.id && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+                {getButtonLabel(plan.id)}
+              </Button>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

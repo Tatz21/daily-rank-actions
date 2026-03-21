@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { User, Globe, CreditCard, LogOut, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -14,8 +15,15 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
+const planLabels: Record<string, { label: string; desc: string }> = {
+  free: { label: "Free Plan", desc: "3 audits · 20 keyword searches" },
+  creator: { label: "Creator Plan", desc: "Unlimited audits · Keyword research" },
+  pro: { label: "Pro Plan", desc: "Full access · All features" },
+};
+
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
+  const { plan, loading: subLoading } = useSubscription();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [domain, setDomain] = useState("");
@@ -25,8 +33,6 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!user) return;
     setDisplayName(user.user_metadata?.display_name || "");
-
-    // Fetch user's primary website
     supabase.from("websites").select("domain").eq("user_id", user.id).limit(1).single()
       .then(({ data }) => { if (data) setDomain(data.domain); });
   }, [user]);
@@ -35,17 +41,10 @@ export default function SettingsPage() {
     if (!user) return;
     setSaving(true);
     try {
-      const { error: authError } = await supabase.auth.updateUser({
-        data: { display_name: displayName },
-      });
+      const { error: authError } = await supabase.auth.updateUser({ data: { display_name: displayName } });
       if (authError) throw authError;
-
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ display_name: displayName })
-        .eq("user_id", user.id);
+      const { error: profileError } = await supabase.from("profiles").update({ display_name: displayName }).eq("user_id", user.id);
       if (profileError) throw profileError;
-
       toast.success("Profile updated!");
     } catch (err: any) {
       toast.error(err.message || "Failed to update profile");
@@ -58,14 +57,7 @@ export default function SettingsPage() {
     if (!user || !domain.trim()) return;
     setSavingDomain(true);
     try {
-      // Check if website exists
-      const { data: existing } = await supabase
-        .from("websites")
-        .select("id")
-        .eq("user_id", user.id)
-        .limit(1)
-        .single();
-
+      const { data: existing } = await supabase.from("websites").select("id").eq("user_id", user.id).limit(1).single();
       if (existing) {
         const { error } = await supabase.from("websites").update({ domain: domain.trim() }).eq("id", existing.id);
         if (error) throw error;
@@ -85,6 +77,8 @@ export default function SettingsPage() {
     await signOut();
     navigate("/");
   };
+
+  const currentPlan = planLabels[plan] || planLabels.free;
 
   return (
     <div className="max-w-2xl">
@@ -127,12 +121,14 @@ export default function SettingsPage() {
           <h2 className="font-semibold mb-4 flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> Subscription</h2>
           <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
             <div>
-              <p className="font-medium text-foreground">Free Plan</p>
-              <p className="text-xs text-muted-foreground">3 audits · 20 keyword searches</p>
+              <p className="font-medium text-foreground">{subLoading ? "Loading..." : currentPlan.label}</p>
+              <p className="text-xs text-muted-foreground">{currentPlan.desc}</p>
             </div>
-            <Button variant="hero-outline" size="sm" asChild>
-              <Link to="/dashboard/pricing">Upgrade</Link>
-            </Button>
+            {plan !== "pro" && (
+              <Button variant="hero-outline" size="sm" asChild>
+                <Link to="/dashboard/pricing">Upgrade</Link>
+              </Button>
+            )}
           </div>
         </motion.div>
 
