@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Shield, Search, TrendingUp, Users, Bot, Settings, Sprout, LogOut, Tags, Link2, FileText, Map, Sun, Moon
+  LayoutDashboard, Shield, Search, TrendingUp, Users, Bot, Settings, Sprout, LogOut, Tags, Link2, FileText, Map, Sun, Moon, CreditCard
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
@@ -8,6 +8,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 
@@ -30,6 +31,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { signOut } = useAuth();
+  const { plan } = useSubscription();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
@@ -72,6 +74,18 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Plan badge */}
+        {!collapsed && plan !== "pro" && (
+          <div className="px-3 pb-2">
+            <Link to="/dashboard/pricing" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-xs">
+              <CreditCard className="h-3.5 w-3.5 text-primary" />
+              <span className="text-primary font-medium capitalize">{plan} Plan</span>
+              <span className="ml-auto text-primary/70">Upgrade</span>
+            </Link>
+          </div>
+        )}
+
         <div className="p-2 border-t border-border space-y-1">
           <SidebarMenuButton onClick={toggleTheme} className="w-full hover:bg-muted/50">
             {theme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
