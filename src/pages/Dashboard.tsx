@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, Search, Users, Shield, Loader2, ArrowUpRight, Tags, Link2, FileText, Map, Bot } from "lucide-react";
+import { TrendingUp, Search, Users, Shield, Loader2, ArrowUpRight, Tags, Link2, FileText, Map, Bot, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Link } from "react-router-dom";
 
 const fadeUp = {
@@ -13,9 +14,31 @@ const fadeUp = {
   }),
 };
 
+function HealthRing({ score }: { score: number }) {
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (score / 100) * circumference;
+  const color = score >= 70 ? "text-primary" : score >= 40 ? "text-amber-500" : "text-destructive";
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width="100" height="100" className="-rotate-90">
+        <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6" className="stroke-muted/30" />
+        <circle
+          cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
+          strokeDasharray={circumference} strokeDashoffset={offset}
+          strokeLinecap="round" className={`${color} stroke-current transition-all duration-1000`}
+        />
+      </svg>
+      <span className={`absolute text-xl font-bold ${color}`}>{score}</span>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ audits: 0, keywords: 0, tracked: 0, latestScore: 0 });
+  const { plan } = useSubscription();
+  const [stats, setStats] = useState({ audits: 0, keywords: 0, tracked: 0, latestScore: 0, avgScore: 0 });
   const [recentAudits, setRecentAudits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,12 +53,14 @@ export default function Dashboard() {
       ]);
 
       const audits = auditsRes.data || [];
+      const avgScore = audits.length ? Math.round(audits.reduce((a, b) => a + b.seo_score, 0) / audits.length) : 0;
       setRecentAudits(audits);
       setStats({
         audits: audits.length,
         keywords: keywordsRes.count || 0,
         tracked: trackingRes.count || 0,
         latestScore: audits[0]?.seo_score || 0,
+        avgScore,
       });
       setLoading(false);
     };
@@ -44,9 +69,9 @@ export default function Dashboard() {
   }, [user]);
 
   const statCards = [
-    { label: "SEO Score", value: stats.latestScore || "—", icon: TrendingUp, link: "/dashboard/audit" },
     { label: "Keywords Saved", value: stats.keywords, icon: Search, link: "/dashboard/keywords" },
-    { label: "Keywords Tracked", value: stats.tracked, icon: Users, link: "/dashboard/rank-tracker" },
+    { label: "Keywords Tracked", value: stats.tracked, icon: TrendingUp, link: "/dashboard/rank-tracker" },
+    { label: "Total Audits", value: stats.audits, icon: Shield, link: "/dashboard/audit" },
   ];
 
   const quickTools = [
@@ -72,9 +97,25 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
+          {/* SEO Health Score */}
+          <motion.div initial="hidden" animate="visible" custom={1} variants={fadeUp} className="glass-card p-6 mb-6">
+            <div className="flex items-center gap-6 flex-wrap">
+              <HealthRing score={stats.avgScore} />
+              <div>
+                <h2 className="font-semibold text-lg flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-primary" /> SEO Health Score
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {stats.avgScore >= 70 ? "Great! Your site is well optimized." : stats.avgScore >= 40 ? "Room for improvement. Check your audits." : stats.audits === 0 ? "Run your first audit to see your score." : "Needs attention. Review your SEO issues."}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2 capitalize">Plan: <span className="text-primary font-medium">{plan}</span></p>
+              </div>
+            </div>
+          </motion.div>
+
           <div className="grid sm:grid-cols-3 gap-4 mb-8">
             {statCards.map((s, i) => (
-              <motion.div key={s.label} initial="hidden" animate="visible" custom={i + 1} variants={fadeUp}>
+              <motion.div key={s.label} initial="hidden" animate="visible" custom={i + 2} variants={fadeUp}>
                 <Link to={s.link} className="glass-card p-5 block hover:border-primary/30 transition-colors">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm text-muted-foreground">{s.label}</span>
@@ -86,8 +127,7 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Quick Tools Grid */}
-          <motion.div initial="hidden" animate="visible" custom={4} variants={fadeUp} className="mb-8">
+          <motion.div initial="hidden" animate="visible" custom={5} variants={fadeUp} className="mb-8">
             <h2 className="font-semibold text-lg mb-4">Quick Tools</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {quickTools.map((tool) => (
@@ -100,7 +140,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <motion.div initial="hidden" animate="visible" custom={5} variants={fadeUp} className="glass-card p-6">
+          <motion.div initial="hidden" animate="visible" custom={6} variants={fadeUp} className="glass-card p-6">
             <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
               <Shield className="h-4 w-4 text-primary" />
               Recent Audits
