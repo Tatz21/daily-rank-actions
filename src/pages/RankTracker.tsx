@@ -49,7 +49,10 @@ export default function RankTracker() {
 
   useEffect(() => { fetchTracked(); }, [user]);
 
-  if (!subLoading && !canUse("rankTracker")) {
+  if (subLoading) {
+    return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
+  if (!canUse("rankTracker")) {
     return <UpgradeNudge feature="Rank Tracker" requiredPlan="Pro" />;
   }
 
