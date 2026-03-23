@@ -1,0 +1,1 @@
+ALTER TABLE public.subscriptions ADD COLUMN trial_ends_at timestamptz DEFAULT NULL;
