@@ -179,6 +179,14 @@ export default function Dashboard() {
                         {audit.seo_score}
                       </span>
                       <span className="text-xs text-muted-foreground">/100</span>
+                      <button
+                        onClick={(e) => handleDeleteAudit(e, audit.id)}
+                        disabled={deleting === audit.id}
+                        className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                        title="Delete audit"
+                      >
+                        {deleting === audit.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                      </button>
                       <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   </Link>
