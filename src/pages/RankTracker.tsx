@@ -40,10 +40,6 @@ export default function RankTracker() {
   const { user } = useAuth();
   const { canUse, loading: subLoading } = useSubscription();
 
-  if (!subLoading && !canUse("rankTracker")) {
-    return <UpgradeNudge feature="Rank Tracker" requiredPlan="Pro" />;
-  }
-
   const fetchTracked = async () => {
     if (!user) return;
     const { data, error } = await supabase.from("rank_tracking").select("*").eq("user_id", user.id).order("tracked_at", { ascending: false });
@@ -52,6 +48,10 @@ export default function RankTracker() {
   };
 
   useEffect(() => { fetchTracked(); }, [user]);
+
+  if (!subLoading && !canUse("rankTracker")) {
+    return <UpgradeNudge feature="Rank Tracker" requiredPlan="Pro" />;
+  }
 
   const handleAdd = async () => {
     if (!keyword.trim() || !user) return;
