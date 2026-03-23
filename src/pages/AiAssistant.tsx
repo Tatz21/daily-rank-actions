@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import HowToUse from "@/components/HowToUse";
 import QuickSuggestions from "@/components/QuickSuggestions";
+import { useSubscription } from "@/hooks/useSubscription";
+import UpgradeNudge from "@/components/UpgradeNudge";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
