@@ -41,6 +41,21 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ audits: 0, keywords: 0, tracked: 0, latestScore: 0, avgScore: 0 });
   const [recentAudits, setRecentAudits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const handleDeleteAudit = async (e: React.MouseEvent, auditId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDeleting(auditId);
+    const { error } = await supabase.from("seo_audits").delete().eq("id", auditId).eq("user_id", user!.id);
+    if (error) {
+      toast.error("Failed to delete audit");
+    } else {
+      setRecentAudits((prev) => prev.filter((a) => a.id !== auditId));
+      toast.success("Audit deleted");
+    }
+    setDeleting(null);
+  };
 
   useEffect(() => {
     if (!user) return;
