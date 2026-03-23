@@ -144,6 +144,7 @@ export type Database = {
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
           status: string
+          trial_ends_at: string | null
           updated_at: string
           user_id: string
         }
@@ -154,6 +155,7 @@ export type Database = {
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           status?: string
+          trial_ends_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -164,6 +166,7 @@ export type Database = {
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           status?: string
+          trial_ends_at?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -53,7 +53,7 @@ declare global {
 
 export default function PricingPage() {
   const { user } = useAuth();
-  const { plan: currentPlan, loading: subLoading } = useSubscription();
+  const { plan: currentPlan, loading: subLoading, isTrial, trialDaysLeft } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
 
   const loadRazorpayScript = (): Promise<boolean> => {
@@ -65,6 +65,30 @@ export default function PricingPage() {
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
+  };
+
+  const handleStartTrial = async () => {
+    if (!user) { toast.error("Please log in first"); return; }
+    setLoading("trial");
+    try {
+      const trialEnd = new Date();
+      trialEnd.setDate(trialEnd.getDate() + 7);
+
+      const { error } = await supabase.from("subscriptions").upsert({
+        user_id: user.id,
+        plan: "pro",
+        status: "trialing",
+        trial_ends_at: trialEnd.toISOString(),
+      }, { onConflict: "user_id" });
+
+      if (error) throw error;
+      toast.success("7-day Pro trial started! 🎉");
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start trial");
+    } finally {
+      setLoading(null);
+    }
   };
 
   const handleSubscribe = async (planId: string) => {
@@ -138,9 +162,35 @@ export default function PricingPage() {
       <motion.h1 initial="hidden" animate="visible" custom={0} variants={fadeUp} className="text-2xl font-bold mb-2">
         Upgrade Your Plan
       </motion.h1>
-      <motion.p initial="hidden" animate="visible" custom={0} variants={fadeUp} className="text-muted-foreground mb-8">
+      <motion.p initial="hidden" animate="visible" custom={0} variants={fadeUp} className="text-muted-foreground mb-4">
         Unlock more SEO power. Cancel anytime.
       </motion.p>
+
+      {isTrial && (
+        <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="glass-card p-4 mb-6 flex items-center gap-3 border-primary/30">
+          <Sparkles className="h-5 w-5 text-primary shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Pro Trial Active</p>
+            <p className="text-xs text-muted-foreground">{trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining. Subscribe to keep Pro features.</p>
+          </div>
+        </motion.div>
+      )}
+
+      {!isTrial && currentPlan === "free" && (
+        <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="glass-card p-4 mb-6 flex items-center justify-between border-primary/30">
+          <div className="flex items-center gap-3">
+            <Crown className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Try Pro free for 7 days</p>
+              <p className="text-xs text-muted-foreground">Access rank tracking, competitor analysis & AI assistant — no card required.</p>
+            </div>
+          </div>
+          <Button variant="hero" size="sm" onClick={handleStartTrial} disabled={loading !== null}>
+            {loading === "trial" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : null}
+            Start Trial
+          </Button>
+        </motion.div>
+      )}
 
       <div className="grid md:grid-cols-3 gap-4">
         {plans.map((plan, i) => {
