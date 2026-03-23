@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import HowToUse from "@/components/HowToUse";
 import QuickSuggestions from "@/components/QuickSuggestions";
+import { useSubscription } from "@/hooks/useSubscription";
+import UpgradeNudge from "@/components/UpgradeNudge";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -33,6 +35,11 @@ export default function CompetitorAnalysis() {
   const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<CompetitorData | null>(null);
+  const { canUse, loading: subLoading } = useSubscription();
+
+  if (!subLoading && !canUse("competitors")) {
+    return <UpgradeNudge feature="Competitor Analysis" requiredPlan="Pro" />;
+  }
 
   const handleAnalyze = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();

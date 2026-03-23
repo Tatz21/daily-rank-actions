@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import HowToUse from "@/components/HowToUse";
 import QuickSuggestions from "@/components/QuickSuggestions";
+import { useSubscription } from "@/hooks/useSubscription";
+import UpgradeNudge from "@/components/UpgradeNudge";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -36,6 +38,7 @@ export default function RankTracker() {
   const [tracked, setTracked] = useState<TrackedKeyword[]>([]);
   const [fetching, setFetching] = useState(true);
   const { user } = useAuth();
+  const { canUse, loading: subLoading } = useSubscription();
 
   const fetchTracked = async () => {
     if (!user) return;
@@ -45,6 +48,10 @@ export default function RankTracker() {
   };
 
   useEffect(() => { fetchTracked(); }, [user]);
+
+  if (!subLoading && !canUse("rankTracker")) {
+    return <UpgradeNudge feature="Rank Tracker" requiredPlan="Pro" />;
+  }
 
   const handleAdd = async () => {
     if (!keyword.trim() || !user) return;
