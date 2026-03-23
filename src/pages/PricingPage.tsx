@@ -53,7 +53,7 @@ declare global {
 
 export default function PricingPage() {
   const { user } = useAuth();
-  const { plan: currentPlan, loading: subLoading } = useSubscription();
+  const { plan: currentPlan, loading: subLoading, isTrial, trialDaysLeft } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
 
   const loadRazorpayScript = (): Promise<boolean> => {
@@ -65,6 +65,30 @@ export default function PricingPage() {
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
+  };
+
+  const handleStartTrial = async () => {
+    if (!user) { toast.error("Please log in first"); return; }
+    setLoading("trial");
+    try {
+      const trialEnd = new Date();
+      trialEnd.setDate(trialEnd.getDate() + 7);
+
+      const { error } = await supabase.from("subscriptions").upsert({
+        user_id: user.id,
+        plan: "pro",
+        status: "trialing",
+        trial_ends_at: trialEnd.toISOString(),
+      }, { onConflict: "user_id" });
+
+      if (error) throw error;
+      toast.success("7-day Pro trial started! 🎉");
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start trial");
+    } finally {
+      setLoading(null);
+    }
   };
 
   const handleSubscribe = async (planId: string) => {
