@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, Search, Users, Shield, Loader2, ArrowUpRight, Tags, Link2, FileText, Map, Bot, Activity } from "lucide-react";
+import { TrendingUp, Search, Users, Shield, Loader2, ArrowUpRight, Tags, Link2, FileText, Map, Bot, Activity, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
