@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, Search, Users, Shield, Loader2, ArrowUpRight, Tags, Link2, FileText, Map, Bot, Activity } from "lucide-react";
+import { TrendingUp, Search, Users, Shield, Loader2, ArrowUpRight, Tags, Link2, FileText, Map, Bot, Activity, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -41,6 +42,21 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ audits: 0, keywords: 0, tracked: 0, latestScore: 0, avgScore: 0 });
   const [recentAudits, setRecentAudits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const handleDeleteAudit = async (e: React.MouseEvent, auditId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDeleting(auditId);
+    const { error } = await supabase.from("seo_audits").delete().eq("id", auditId).eq("user_id", user!.id);
+    if (error) {
+      toast.error("Failed to delete audit");
+    } else {
+      setRecentAudits((prev) => prev.filter((a) => a.id !== auditId));
+      toast.success("Audit deleted");
+    }
+    setDeleting(null);
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -163,6 +179,14 @@ export default function Dashboard() {
                         {audit.seo_score}
                       </span>
                       <span className="text-xs text-muted-foreground">/100</span>
+                      <button
+                        onClick={(e) => handleDeleteAudit(e, audit.id)}
+                        disabled={deleting === audit.id}
+                        className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                        title="Delete audit"
+                      >
+                        {deleting === audit.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                      </button>
                       <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   </Link>

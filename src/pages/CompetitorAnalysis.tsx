@@ -37,7 +37,10 @@ export default function CompetitorAnalysis() {
   const [data, setData] = useState<CompetitorData | null>(null);
   const { canUse, loading: subLoading } = useSubscription();
 
-  if (!subLoading && !canUse("competitors")) {
+  if (subLoading) {
+    return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
+  if (!canUse("competitors")) {
     return <UpgradeNudge feature="Competitor Analysis" requiredPlan="Pro" />;
   }
 
