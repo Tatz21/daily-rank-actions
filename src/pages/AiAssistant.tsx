@@ -39,6 +39,11 @@ export default function AiAssistant() {
   const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
+  const { canUse, loading: subLoading } = useSubscription();
+
+  if (!subLoading && !canUse("aiAssistant")) {
+    return <UpgradeNudge feature="AI SEO Assistant" requiredPlan="Pro" />;
+  }
 
   const handleGenerate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();

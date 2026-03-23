@@ -38,6 +38,11 @@ export default function RankTracker() {
   const [tracked, setTracked] = useState<TrackedKeyword[]>([]);
   const [fetching, setFetching] = useState(true);
   const { user } = useAuth();
+  const { canUse, loading: subLoading } = useSubscription();
+
+  if (!subLoading && !canUse("rankTracker")) {
+    return <UpgradeNudge feature="Rank Tracker" requiredPlan="Pro" />;
+  }
 
   const fetchTracked = async () => {
     if (!user) return;
