@@ -41,7 +41,10 @@ export default function AiAssistant() {
   const [sections, setSections] = useState<Section[]>([]);
   const { canUse, loading: subLoading } = useSubscription();
 
-  if (!subLoading && !canUse("aiAssistant")) {
+  if (subLoading) {
+    return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
+  if (!canUse("aiAssistant")) {
     return <UpgradeNudge feature="AI SEO Assistant" requiredPlan="Pro" />;
   }
 
