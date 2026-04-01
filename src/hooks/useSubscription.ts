@@ -29,6 +29,14 @@ export function useSubscription(): SubscriptionData & { limits: typeof PLAN_LIMI
   useEffect(() => {
     if (!user) { setLoading(false); return; }
 
+    // Hardcoded premium for testing account
+    if (user.email === "mondaldebdip7585@gmail.com") {
+      setPlan("pro");
+      setStatus("active");
+      setLoading(false);
+      return;
+    }
+
     supabase
       .from("subscriptions")
       .select("plan, status, trial_ends_at")
@@ -45,7 +53,6 @@ export function useSubscription(): SubscriptionData & { limits: typeof PLAN_LIMI
             setIsTrial(true);
             setTrialDaysLeft(Math.ceil((trialEnd!.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
           } else if (data.status === "trialing" && trialEnd && trialEnd <= now) {
-            // Trial expired — treat as free
             setPlan("free");
             setIsTrial(false);
           } else {
