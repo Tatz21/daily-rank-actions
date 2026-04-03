@@ -9,6 +9,7 @@ import SwipeablePages from "@/components/SwipeablePages";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const isMobile = useIsMobile();
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
