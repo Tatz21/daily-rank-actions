@@ -41,7 +41,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6 pb-20 md:pb-6">
             <PageTransition>
-              {children}
+              {isMobile ? (
+                <SwipeablePages>{children}</SwipeablePages>
+              ) : (
+                children
+              )}
             </PageTransition>
           </main>
         </div>
