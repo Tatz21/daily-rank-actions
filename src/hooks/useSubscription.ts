@@ -29,8 +29,8 @@ export function useSubscription(): SubscriptionData & { limits: typeof PLAN_LIMI
   useEffect(() => {
     if (!user) { setLoading(false); return; }
 
-    // Hardcoded premium for testing account
-    if (user.email === "mondaldebdip7585@gmail.com") {
+    // Hardcoded premium for testing accounts
+    if (user.email === "mondaldebdip7585@gmail.com" || user.email === "mondaldebdip007@gmail.com") {
       setPlan("pro");
       setStatus("active");
       setLoading(false);
