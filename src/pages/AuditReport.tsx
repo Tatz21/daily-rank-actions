@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, AlertTriangle, CheckCircle2, Info, ArrowLeft, Loader2 } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle2, Info, ArrowLeft, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
