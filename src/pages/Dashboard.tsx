@@ -145,6 +145,10 @@ export default function Dashboard() {
           </div>
 
           <motion.div initial="hidden" animate="visible" custom={5} variants={fadeUp} className="mb-8">
+            <ScoreTrendsChart />
+          </motion.div>
+
+          <motion.div initial="hidden" animate="visible" custom={6} variants={fadeUp} className="mb-8">
             <h2 className="font-semibold text-lg mb-4">Quick Tools</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {quickTools.map((tool) => (
