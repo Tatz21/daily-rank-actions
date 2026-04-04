@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, AlertTriangle, CheckCircle2, Info, ArrowLeft, Loader2 } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle2, Info, ArrowLeft, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { exportAuditPdf } from "@/lib/exportPdf";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -67,10 +68,13 @@ export default function AuditReport() {
         <Button variant="ghost" size="icon" asChild>
           <Link to="/dashboard"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold">Audit Report</h1>
           <p className="text-sm text-muted-foreground">{audit.domain} • {new Date(audit.created_at).toLocaleDateString()}</p>
         </div>
+        <Button variant="hero-outline" size="sm" onClick={() => exportAuditPdf({ ...audit, issues: categories })}>
+          <Download className="h-4 w-4 mr-1" /> Export PDF
+        </Button>
       </motion.div>
 
       <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-6 flex items-center gap-6 mb-6">
