@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import ScoreTrendsChart from "@/components/ScoreTrendsChart";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
