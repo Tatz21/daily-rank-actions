@@ -135,6 +135,30 @@ export default function SettingsPage() {
           </div>
         </motion.div>
 
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-6">
+          <h2 className="font-semibold mb-4 flex items-center gap-2"><Bell className="h-4 w-4 text-primary" /> Notifications</h2>
+          {isSupported ? (
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+              <div>
+                <p className="font-medium text-foreground">Push Notifications</p>
+                <p className="text-xs text-muted-foreground">Get SEO alerts and weekly reports</p>
+              </div>
+              <Switch
+                checked={permission === "granted"}
+                onCheckedChange={() => {
+                  if (permission !== "granted") requestPermission();
+                }}
+                disabled={permission === "denied"}
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Push notifications are not supported in this browser. Try opening the app on your phone.</p>
+          )}
+          {permission === "denied" && (
+            <p className="text-xs text-destructive mt-2">Notifications are blocked. Enable them in your browser settings.</p>
+          )}
+        </motion.div>
+
         <motion.div initial="hidden" animate="visible" variants={fadeUp}>
           <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 mr-2" /> Sign Out
