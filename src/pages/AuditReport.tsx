@@ -5,6 +5,7 @@ import { Shield, AlertTriangle, CheckCircle2, Info, ArrowLeft, Loader2, Download
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { exportAuditPdf } from "@/lib/exportPdf";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
