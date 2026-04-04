@@ -26,6 +26,7 @@ const planLabels: Record<string, { label: string; desc: string }> = {
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
   const { plan, loading: subLoading } = useSubscription();
+  const { isSupported, permission, requestPermission } = usePushNotifications();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [domain, setDomain] = useState("");
