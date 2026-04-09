@@ -71,17 +71,8 @@ export default function PricingPage() {
     if (!user) { toast.error("Please log in first"); return; }
     setLoading("trial");
     try {
-      const trialEnd = new Date();
-      trialEnd.setDate(trialEnd.getDate() + 7);
-
-      const { error } = await supabase.from("subscriptions").upsert({
-        user_id: user.id,
-        plan: "pro",
-        status: "trialing",
-        trial_ends_at: trialEnd.toISOString(),
-      }, { onConflict: "user_id" });
-
-      if (error) throw error;
+      const { data, error } = await supabase.functions.invoke("start-trial");
+      if (error || data?.error) throw new Error(data?.error || error?.message);
       toast.success("7-day Pro trial started! 🎉");
       window.location.reload();
     } catch (err: any) {
