@@ -39,7 +39,7 @@ function HealthRing({ score }: { score: number }) {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { plan } = useSubscription();
+  const { plan, isTrial, trialDaysLeft } = useSubscription();
   const [stats, setStats] = useState({ audits: 0, keywords: 0, tracked: 0, latestScore: 0, avgScore: 0 });
   const [recentAudits, setRecentAudits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
