@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,9 +32,7 @@ serve(async (req) => {
       throw new Error("Invalid plan selected");
     }
 
-    const credentials = encode(
-      new TextEncoder().encode(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`)
-    );
+    const credentials = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
 
     const response = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
@@ -72,7 +70,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error creating Razorpay order:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
