@@ -114,6 +114,28 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
+          {/* Trial Banner */}
+          {isTrial && (
+            <motion.div initial="hidden" animate="visible" custom={0.5} variants={fadeUp} className="glass-card p-4 mb-6 flex items-center justify-between border-primary/30 bg-primary/5">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                    <Crown className="h-3.5 w-3.5 text-primary" /> Pro Trial Active
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining — subscribe now to keep all Pro features.
+                  </p>
+                </div>
+              </div>
+              <Link to="/dashboard/pricing">
+                <Button variant="hero" size="sm">Subscribe Now</Button>
+              </Link>
+            </motion.div>
+          )}
+
           {/* SEO Health Score */}
           <motion.div initial="hidden" animate="visible" custom={1} variants={fadeUp} className="glass-card p-6 mb-6">
             <div className="flex items-center gap-6 flex-wrap">
